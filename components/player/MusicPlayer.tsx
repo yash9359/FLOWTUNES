@@ -42,6 +42,17 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
 
   const [showQueue, setShowQueue] = useState(false);
   
+  useEffect(() => {
+    if (isMobileExpanded) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileExpanded]);
+  
   const user = useAppStore(state => state.user);
   const likedSongs = useAppStore(state => state.likedSongs);
   const likeSong = useAppStore(state => state.likeSong);
@@ -194,7 +205,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
               className="fixed inset-0 bg-neutral-950 z-50 flex flex-col justify-between px-6 py-8 transition-all duration-500"
               style={{
-                background: 'radial-gradient(circle at top, var(--vibe-bg-glow), #050505 85%)'
+                backgroundImage: 'radial-gradient(circle at top, var(--vibe-bg-glow), #050505 85%)'
               }}
             >
               <div className="flex items-center justify-between">

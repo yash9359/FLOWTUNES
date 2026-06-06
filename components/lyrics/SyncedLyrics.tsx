@@ -143,7 +143,7 @@ export const SyncedLyrics: React.FC<SyncedLyricsProps> = ({ onClose }) => {
       exit={{ opacity: 0, y: 30 }}
       className="fixed inset-0 z-60 bg-neutral-950/95 backdrop-blur-3xl flex flex-col md:bottom-22 transition-all duration-500"
       style={{
-        background: 'radial-gradient(circle at top, var(--vibe-bg-glow), rgba(10, 10, 10, 0.98) 85%)'
+        backgroundImage: 'radial-gradient(circle at top, var(--vibe-bg-glow), rgba(10, 10, 10, 0.98) 85%)'
       }}
     >
       <div
