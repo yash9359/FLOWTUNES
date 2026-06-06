@@ -29,10 +29,10 @@ export const BottomNav: React.FC = () => {
             key={tab.href}
             href={tab.href}
             className={`flex flex-col items-center gap-1 flex-1 py-1 transition-all ${
-              isActive ? 'text-violet-400' : 'text-neutral-400 hover:text-white'
+              isActive ? 'text-vibe-accent' : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Icon size={20} className={isActive ? 'scale-110 text-violet-400' : 'text-neutral-400'} />
+            <Icon size={20} className={isActive ? 'scale-110 text-vibe-accent' : 'text-neutral-400'} />
             <span className="text-[9px] font-semibold tracking-wide select-none">{tab.label}</span>
           </Link>
         );

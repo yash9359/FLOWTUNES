@@ -52,13 +52,13 @@ export const Sidebar: React.FC = () => {
       <div className="flex flex-col gap-8">
         <Link href="/" className="flex items-center gap-2.5 px-2">
           <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20"
-            style={{ backgroundImage: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
+            className="h-9 w-9 rounded-xl flex items-center justify-center shadow-lg shadow-vibe-accent/20 transition-all duration-500"
+            style={{ backgroundImage: 'linear-gradient(135deg, var(--vibe-accent), rgba(var(--vibe-accent-rgb), 0.6))' }}
           >
             <Compass className="text-white h-5.5 w-5.5 animate-spin-slow" />
           </div>
           <span className="text-xl font-black tracking-tight text-white bg-clip-text">
-            Flow<span className="text-violet-400">Tunes</span>
+            Flow<span className="text-vibe-accent transition-colors duration-500">Tunes</span>
           </span>
         </Link>
 
@@ -72,16 +72,16 @@ export const Sidebar: React.FC = () => {
                 href={link.href}
                 className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold group ${
                   isActive 
-                    ? 'text-white shadow-sm border border-violet-500/20' 
+                    ? 'text-white shadow-sm border border-vibe-accent/20' 
                     : 'text-neutral-400 hover:text-white hover:bg-neutral-900/50'
                 }`}
                 style={
                   isActive
-                    ? { backgroundImage: 'linear-gradient(90deg, rgba(124,58,237,0.25), rgba(79,70,229,0.1))' }
+                    ? { backgroundImage: 'linear-gradient(90deg, var(--vibe-accent-muted), rgba(var(--vibe-accent-rgb), 0.05))' }
                     : undefined
                 }
               >
-                <Icon size={18} className={`transition-transform duration-200 group-hover:scale-105 ${isActive ? 'text-violet-400' : 'text-neutral-400 group-hover:text-white'}`} />
+                <Icon size={18} className={`transition-transform duration-200 group-hover:scale-105 ${isActive ? 'text-vibe-accent' : 'text-neutral-400 group-hover:text-white'}`} />
                 {link.label}
               </Link>
             );
@@ -92,16 +92,16 @@ export const Sidebar: React.FC = () => {
               href="/admin"
               className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 text-sm font-semibold group ${
                 pathname.startsWith('/admin')
-                  ? 'text-white shadow-sm border border-violet-500/20'
+                  ? 'text-white shadow-sm border border-vibe-accent/20'
                   : 'text-neutral-400 hover:text-white hover:bg-neutral-900/50'
               }`}
               style={
                 pathname.startsWith('/admin')
-                  ? { backgroundImage: 'linear-gradient(90deg, rgba(124,58,237,0.25), rgba(79,70,229,0.1))' }
+                  ? { backgroundImage: 'linear-gradient(90deg, var(--vibe-accent-muted), rgba(var(--vibe-accent-rgb), 0.05))' }
                   : undefined
               }
             >
-              <ShieldAlert size={18} className="text-violet-400" />
+              <ShieldAlert size={18} className="text-vibe-accent" />
               Admin Panel
             </Link>
           )}
@@ -113,8 +113,8 @@ export const Sidebar: React.FC = () => {
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2 px-2">
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[11px] shadow"
-                style={{ backgroundImage: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[11px] shadow transition-all duration-500"
+                style={{ backgroundImage: 'linear-gradient(135deg, var(--vibe-accent), rgba(var(--vibe-accent-rgb), 0.6))' }}
               >
                 {(userName || userEmail)[0].toUpperCase()}
               </div>

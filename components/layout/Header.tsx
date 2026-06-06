@@ -70,13 +70,13 @@ export const Header: React.FC = () => {
 
       <div className="flex md:hidden items-center gap-2">
         <div
-          className="h-7 w-7 rounded-lg flex items-center justify-center shadow shadow-violet-500/20"
-          style={{ backgroundImage: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
+          className="h-7 w-7 rounded-lg flex items-center justify-center shadow shadow-vibe-accent/20 transition-all duration-500"
+          style={{ backgroundImage: 'linear-gradient(135deg, var(--vibe-accent), rgba(var(--vibe-accent-rgb), 0.6))' }}
         >
           <Compass className="text-white h-4.5 w-4.5 animate-spin-slow" />
         </div>
         <span className="text-base font-black tracking-tight text-white">
-          Flow<span className="text-violet-400">Tunes</span>
+          Flow<span className="text-vibe-accent transition-colors duration-500">Tunes</span>
         </span>
       </div>
 
@@ -93,8 +93,8 @@ export const Header: React.FC = () => {
                 </span>
               )}
               <div
-                className="w-8 h-8 rounded-full text-white font-bold flex items-center justify-center text-xs shadow-lg border border-white/10 select-none transition-transform hover:scale-105 active:scale-95"
-                style={{ backgroundImage: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
+                className="w-8 h-8 rounded-full text-white font-bold flex items-center justify-center text-xs shadow-lg border border-white/10 select-none transition-transform hover:scale-105 active:scale-95 duration-500"
+                style={{ backgroundImage: 'linear-gradient(135deg, var(--vibe-accent), rgba(var(--vibe-accent-rgb), 0.6))' }}
               >
                 {(userName || userEmail)[0].toUpperCase()}
               </div>
@@ -137,7 +137,7 @@ export const Header: React.FC = () => {
                         }}
                         className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-lg text-neutral-300 hover:text-white hover:bg-white/5 transition-colors font-semibold"
                       >
-                        <ShieldAlert size={15} className="text-violet-400" />
+                        <ShieldAlert size={15} className="text-vibe-accent" />
                         Admin Panel
                       </button>
                     )}

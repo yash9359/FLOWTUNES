@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { Song } from '@/types';
 import { createClient } from '@/lib/supabase/client';
 import { useAppStore } from '@/lib/store/useAppStore';
+import { extractColorsFromImage, getDefaultColors } from '@/lib/vibe';
 
 type RepeatMode = 'none' | 'one' | 'all';
 
@@ -65,6 +66,37 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   useEffect(() => {
+    const updateVibeColors = async () => {
+      if (!currentSong || !currentSong.thumbnailUrl) {
+        const defaults = getDefaultColors();
+        const root = document.documentElement;
+        root.style.setProperty('--vibe-accent', defaults.accent);
+        root.style.setProperty('--vibe-accent-rgb', defaults.accentRgb);
+        root.style.setProperty('--vibe-accent-hover', defaults.accentHover);
+        root.style.setProperty('--vibe-accent-muted', defaults.accentMuted);
+        root.style.setProperty('--vibe-glow', defaults.glow);
+        root.style.setProperty('--vibe-bg-glow', defaults.bgGlow);
+        return;
+      }
+
+      try {
+        const colors = await extractColorsFromImage(currentSong.thumbnailUrl);
+        const root = document.documentElement;
+        root.style.setProperty('--vibe-accent', colors.accent);
+        root.style.setProperty('--vibe-accent-rgb', colors.accentRgb);
+        root.style.setProperty('--vibe-accent-hover', colors.accentHover);
+        root.style.setProperty('--vibe-accent-muted', colors.accentMuted);
+        root.style.setProperty('--vibe-glow', colors.glow);
+        root.style.setProperty('--vibe-bg-glow', colors.bgGlow);
+      } catch (err) {
+        console.warn('[Vibe] Failed to update dynamic colors:', err);
+      }
+    };
+
+    updateVibeColors();
+  }, [currentSong]);
+
+  useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
     }
@@ -89,7 +121,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return;
       }
       
-      // Clean title for search matching
       const cleanSongTitle = currentSong.title
         .replace(/\(From\s+.*\)|\[From\s+.*\]|\(Official.*\)|\[Official.*\]|\(Video.*\)|\[Video.*\]|\(Lyrics.*\)|\[Lyrics.*\]|\(Full.*\)|\[Full.*\]|OST|Remix|New Song|Video Jukebox|Audio Song| - Topic|#\S+/gi, '')
         .replace(/\s+/g, ' ')
@@ -97,7 +128,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         
       const searchTerms = `${cleanSongTitle} ${currentSong.artist}`.replace(/Unknown Artist|Various Artists/gi, '').trim();
 
-      // 1. Try Direct ID resolution on client-side (Highest Priority)
       try {
         const res = await fetch(`https://jio-savan-api-omega.vercel.app/song/get/?id=${currentSong.id}`).then(r => r.json());
         if (res && res.media_url) {
@@ -109,7 +139,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       } catch (e) {}
 
-      // 2. Try Content Match (Title + Artist) on client-side
       console.log('[Player] ID failed, trying Content-Match for:', searchTerms);
       try {
         const sRes = await fetch(`https://jio-savan-api-omega.vercel.app/song/?query=${encodeURIComponent(searchTerms)}`).then(r => r.json());
@@ -123,7 +152,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       } catch (e) {}
 
-      // 3. Try Piped Proxies Directly
       if (currentSong.id.length === 11) {
         const pipedInstances = ['https://pipedapi.kavin.rocks', 'https://pipedapi.moomoo.me', 'https://api.piped.privacydev.net'];
         for (const inst of pipedInstances) {
@@ -141,7 +169,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       }
 
-      // 4. Absolute Fallback to Server Proxy (Might be blocked)
       console.warn('[Player] All client strategies failed, using server proxy.');
       const fallbackUrl = `/api/stream?v=${currentSong.id}&title=${encodeURIComponent(currentSong.title)}&artist=${encodeURIComponent(currentSong.artist)}&cb=v2`;
       store.setCachedStreamUrl(currentSong.id, fallbackUrl);

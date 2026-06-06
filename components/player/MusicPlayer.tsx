@@ -67,7 +67,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-40 hidden md:block border-t border-white/10 bg-black/60 backdrop-blur-xl px-6 py-4">
+      <div 
+        className="fixed bottom-0 left-0 right-0 z-40 hidden md:block border-t border-white/10 bg-black/60 backdrop-blur-xl px-6 py-4 transition-all duration-500"
+        style={{
+          backgroundImage: 'linear-gradient(to top, var(--vibe-bg-glow), rgba(10, 10, 10, 0.75))'
+        }}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
           <div className="flex items-center gap-4 w-1/3 min-w-60">
@@ -91,7 +96,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
               <button
                 onClick={toggleLike}
                 className={`hover:scale-110 active:scale-95 transition-all p-1 rounded-full hover:bg-neutral-800 ${
-                  isLiked ? 'text-violet-500' : 'text-neutral-400 hover:text-white'
+                  isLiked ? 'text-vibe-accent' : 'text-neutral-400 hover:text-white'
                 }`}
               >
                 <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
@@ -123,7 +128,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
             <button
               onClick={onToggleLyrics}
               className={`p-1.5 rounded-full hover:bg-neutral-800 transition-colors ${
-                showLyrics ? 'text-violet-400' : 'text-neutral-400 hover:text-white'
+                showLyrics ? 'text-vibe-accent' : 'text-neutral-400 hover:text-white'
               }`}
               title="Lyrics"
             >
@@ -132,7 +137,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
             <button
               onClick={() => setShowQueue(prev => !prev)}
               className={`p-1.5 rounded-full hover:bg-neutral-800 transition-colors ${
-                showQueue ? 'text-violet-400' : 'text-neutral-400 hover:text-white'
+                showQueue ? 'text-vibe-accent' : 'text-neutral-400 hover:text-white'
               }`}
               title="Queue"
             >
@@ -187,7 +192,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed inset-0 bg-neutral-950 z-50 flex flex-col justify-between px-6 py-8"
+              className="fixed inset-0 bg-neutral-950 z-50 flex flex-col justify-between px-6 py-8 transition-all duration-500"
+              style={{
+                background: 'radial-gradient(circle at top, var(--vibe-bg-glow), #050505 85%)'
+              }}
             >
               <div className="flex items-center justify-between">
                 <button onClick={() => setIsMobileExpanded(false)} className="text-neutral-400 hover:text-white p-2">
@@ -202,7 +210,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
                     setIsMobileExpanded(false);
                     onToggleLyrics();
                   }}
-                  className={`p-2 ${showLyrics ? 'text-violet-400' : 'text-neutral-400'}`}
+                  className={`p-2 ${showLyrics ? 'text-vibe-accent' : 'text-neutral-400'}`}
                 >
                   <AlignLeft size={20} />
                 </button>
@@ -215,7 +223,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
                     animate={{ scale: 1, opacity: 1 }}
                     src={currentSong.thumbnailUrl}
                     alt={currentSong.title}
-                    className="w-72 h-72 object-cover rounded-xl shadow-2xl border border-white/10 shadow-violet-500/5"
+                    className="w-72 h-72 object-cover rounded-xl shadow-2xl border border-white/10 transition-all duration-500"
+                    style={{
+                      boxShadow: '0 20px 40px -10px var(--vibe-glow)'
+                    }}
                   />
                 )}
               </div>
@@ -229,7 +240,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
                   <div className="flex items-center gap-2">
                     <button
                       onClick={toggleLike}
-                      className={`p-2 rounded-full ${isLiked ? 'text-violet-500' : 'text-neutral-400'}`}
+                      className={`p-2 rounded-full ${isLiked ? 'text-vibe-accent' : 'text-neutral-400'}`}
                     >
                       <Heart size={22} fill={isLiked ? 'currentColor' : 'none'} />
                     </button>
@@ -246,7 +257,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
                 <div className="flex items-center justify-between px-6 pb-4">
                   <button
                     onClick={toggleShuffle}
-                    className={`p-2 ${shuffleMode ? 'text-violet-400' : 'text-neutral-400'}`}
+                    className={`p-2 ${shuffleMode ? 'text-vibe-accent' : 'text-neutral-400'}`}
                   >
                     <Shuffle size={20} />
                   </button>
@@ -264,7 +275,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
                   </button>
                   <button
                     onClick={toggleRepeat}
-                    className={`p-2 ${repeatMode !== 'none' ? 'text-violet-400' : 'text-neutral-400'}`}
+                    className={`p-2 ${repeatMode !== 'none' ? 'text-vibe-accent' : 'text-neutral-400'}`}
                   >
                     <Repeat size={20} />
                   </button>
@@ -300,7 +311,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ onToggleLyrics, showLy
                   <div 
                     key={`${song.id}-${i}`}
                     className={`flex items-center justify-between p-2 rounded-lg text-xs group transition-colors ${
-                      currentSong.id === song.id ? 'bg-violet-950/40 text-violet-300' : 'hover:bg-neutral-800/50 text-neutral-300'
+                      currentSong.id === song.id ? 'bg-vibe-accent-muted text-vibe-accent' : 'hover:bg-neutral-800/50 text-neutral-300'
                     }`}
                   >
                     <span className="truncate flex-1 max-w-45 font-semibold">{song.title}</span>

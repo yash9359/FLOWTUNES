@@ -141,14 +141,17 @@ export const SyncedLyrics: React.FC<SyncedLyricsProps> = ({ onClose }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 30 }}
-      className="fixed inset-0 z-60 bg-neutral-950/95 backdrop-blur-3xl flex flex-col md:bottom-22"
+      className="fixed inset-0 z-60 bg-neutral-950/95 backdrop-blur-3xl flex flex-col md:bottom-22 transition-all duration-500"
+      style={{
+        background: 'radial-gradient(circle at top, var(--vibe-bg-glow), rgba(10, 10, 10, 0.98) 85%)'
+      }}
     >
       <div
         className="flex items-center justify-between px-6 pb-4 md:p-6 border-b border-white/5 bg-black/30 shrink-0"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1.25rem)' }}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <AlignLeft className="text-violet-400 shrink-0" size={20} />
+          <AlignLeft className="text-vibe-accent shrink-0" size={20} />
           <div className="min-w-0">
             <h3 className="font-bold text-white text-sm md:text-base leading-none truncate max-w-45 sm:max-w-xs">{currentSong.title}</h3>
             <span className="text-xs text-neutral-400 truncate block max-w-45 sm:max-w-xs mt-1">{currentSong.artist}</span>
@@ -187,7 +190,7 @@ export const SyncedLyrics: React.FC<SyncedLyricsProps> = ({ onClose }) => {
                 onClick={() => seek(line.time)}
                 className={`cursor-pointer transition-all duration-300 text-lg md:text-3xl font-extrabold max-w-2xl leading-snug tracking-tight px-4 py-2 rounded-xl hover:bg-white/5 active:scale-95 ${
                   isActive 
-                    ? 'text-white scale-105 drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]' 
+                    ? 'text-white scale-105 drop-shadow-[0_0_15px_var(--vibe-glow)]' 
                     : 'text-neutral-500 hover:text-neutral-300'
                 }`}
               >

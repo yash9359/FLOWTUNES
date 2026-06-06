@@ -3,12 +3,13 @@ import React from 'react';
 interface SliderProps {
   min: number;
   max: number;
+  step?: number | string;
   value: number;
   onChange: (value: number) => void;
   className?: string;
 }
 
-export const Slider: React.FC<SliderProps> = ({ min, max, value, onChange, className = '' }) => {
+export const Slider: React.FC<SliderProps> = ({ min, max, step = 'any', value, onChange, className = '' }) => {
   const percent = max > min ? ((value - min) / (max - min)) * 100 : 0;
 
   return (
@@ -29,6 +30,7 @@ export const Slider: React.FC<SliderProps> = ({ min, max, value, onChange, class
         type="range"
         min={min}
         max={max}
+        step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"

@@ -2,6 +2,12 @@
 
 @theme {
   --animate-spin-slow: spin 8s linear infinite;
+  
+  --color-vibe-accent: var(--vibe-accent);
+  --color-vibe-accent-hover: var(--vibe-accent-hover);
+  --color-vibe-accent-muted: var(--vibe-accent-muted);
+  --color-vibe-glow: var(--vibe-glow);
+  --color-vibe-bg-glow: var(--vibe-bg-glow);
 }
 
 @keyframes gradient-pan {
@@ -27,6 +33,13 @@
 :root {
   --background: #030303;
   --foreground: #ffffff;
+  
+  --vibe-accent: #8b5cf6;
+  --vibe-accent-rgb: 139, 92, 246;
+  --vibe-accent-hover: #a78bfa;
+  --vibe-accent-muted: rgba(139, 92, 246, 0.15);
+  --vibe-glow: rgba(139, 92, 246, 0.35);
+  --vibe-bg-glow: rgba(139, 92, 246, 0.05);
 }
 
 body {
