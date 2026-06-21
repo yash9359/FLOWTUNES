@@ -107,21 +107,32 @@ export async function GET() {
             played_at
           `)
           .order('played_at', { ascending: false })
-          .limit(6);
+          .limit(30);
 
         if (error || !data || data.length === 0) return [];
 
-        const songIds = data.map(item => item.song_id);
+        // Remove duplicate song_ids while keeping the first (latest) occurrence
+        const uniqueSongIds: string[] = [];
+        const seen = new Set<string>();
+        for (const item of data) {
+          if (item.song_id && !seen.has(item.song_id)) {
+            seen.add(item.song_id);
+            uniqueSongIds.push(item.song_id);
+          }
+        }
+
+        // Take only the top 6 unique song ids
+        const finalSongIds = uniqueSongIds.slice(0, 6);
 
         const { data: songsCache } = await supabase
           .from('songs')
           .select('*')
-          .in('id', songIds);
+          .in('id', finalSongIds);
 
         if (!songsCache) return [];
 
         const orderedSongs: Song[] = [];
-        songIds.forEach(id => {
+        finalSongIds.forEach(id => {
           const found = songsCache.find(s => s.id === id);
           if (found) {
             orderedSongs.push({

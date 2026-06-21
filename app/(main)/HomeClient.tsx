@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Song, Artist, Album } from '@/types';
 import { usePlayer } from '@/context/PlayerContext';
-import { Play, Flame, Music, History, Heart, Disc, Radio } from 'lucide-react';
+import { Play, Pause, Flame, Music, History, Heart, Disc, Radio } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AddToPlaylistMenu } from '@/components/ui/AddToPlaylistMenu';
 
@@ -25,10 +25,14 @@ export default function HomeClient({
   artists,
   albums,
 }: HomeClientProps) {
-  const { playSong } = usePlayer();
+  const { currentSong, isPlaying, playSong, togglePlay } = usePlayer();
 
   const handlePlayCollection = (song: Song, collection: Song[]) => {
-    playSong(song, collection);
+    if (currentSong?.id === song.id) {
+      togglePlay();
+    } else {
+      playSong(song, collection);
+    }
   };
 
   const containerVariants = {
@@ -59,38 +63,57 @@ export default function HomeClient({
             <Radio className="text-violet-500 animate-pulse" size={22} /> Made For You
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {recommendations.slice(0, 4).map((song, idx) => (
-              <motion.div
-                key={`rec-${song.id}-${idx}`}
-                variants={itemVariants}
-                onClick={() => handlePlayCollection(song, recommendations)}
-                className="flex items-center gap-4 bg-neutral-900/30 border border-white/5 hover:border-violet-500/20 rounded-xl p-3 cursor-pointer hover:bg-neutral-800/40 hover:scale-[1.01] transition-all group relative overflow-hidden"
-              >
-                {song.thumbnailUrl && (
-                  <img
-                    src={song.thumbnailUrl}
-                    alt={song.title}
-                    className="w-16 h-16 object-cover rounded-lg shadow border border-white/5 shrink-0"
-                  />
-                )}
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-xs font-bold text-white truncate group-hover:text-violet-400 transition-colors">
-                    {song.title}
-                  </h3>
-                  <p className="text-[10px] text-neutral-400 truncate mt-1">{song.artist}</p>
-                </div>
-                <div
-                  className="absolute top-3 right-3 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                  onClick={e => e.stopPropagation()}
+            {recommendations.slice(0, 4).map((song, idx) => {
+              const isCurrent = currentSong?.id === song.id;
+              const isThisPlaying = isCurrent && isPlaying;
+              return (
+                <motion.div
+                  key={`rec-${song.id}-${idx}`}
+                  variants={itemVariants}
+                  onClick={() => handlePlayCollection(song, recommendations)}
+                  className={`flex items-center gap-4 border rounded-xl p-3 cursor-pointer hover:bg-neutral-800/40 hover:scale-[1.01] transition-all group relative overflow-hidden ${
+                    isCurrent 
+                      ? 'bg-violet-500/10 border-violet-500/30' 
+                      : 'bg-neutral-900/30 border-white/5 hover:border-violet-500/20'
+                  }`}
                 >
-                  <AddToPlaylistMenu song={song} direction="down" />
-                </div>
+                  {song.thumbnailUrl && (
+                    <div className="relative shrink-0">
+                      <img
+                        src={song.thumbnailUrl}
+                        alt={song.title}
+                        className="w-16 h-16 object-cover rounded-lg shadow border border-white/5"
+                      />
+                      {isThisPlaying && (
+                        <div className="absolute bottom-1 left-1 z-10 flex items-end gap-[2px] bg-black/60 p-1 rounded backdrop-blur-sm">
+                          <div className="w-[2px] h-2 bg-violet-400 rounded-full animate-pulse [animation-duration:0.6s]" />
+                          <div className="w-[2px] h-3 bg-violet-400 rounded-full animate-pulse [animation-duration:0.4s]" />
+                          <div className="w-[2px] h-1 bg-violet-400 rounded-full animate-pulse [animation-duration:0.8s]" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className={`text-xs font-bold truncate group-hover:text-violet-400 transition-colors ${
+                      isCurrent ? 'text-violet-400' : 'text-white'
+                    }`}>
+                      {song.title}
+                    </h3>
+                    <p className="text-[10px] text-neutral-400 truncate mt-1">{song.artist}</p>
+                  </div>
+                  <div
+                    className="absolute top-3 right-3 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <AddToPlaylistMenu song={song} direction="down" />
+                  </div>
 
-                <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-violet-600 hover:bg-violet-500 text-white p-2 rounded-full shadow-lg pointer-events-none">
-                  <Play size={14} fill="currentColor" />
-                </div>
-              </motion.div>
-            ))}
+                  <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-violet-600 hover:bg-violet-500 text-white p-2 rounded-full shadow-lg pointer-events-none">
+                    {isThisPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </section>
       )}
@@ -101,12 +124,81 @@ export default function HomeClient({
             <History className="text-neutral-400" size={22} /> Recently Played
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {recentlyPlayed.map((song, idx) => (
+            {recentlyPlayed.map((song, idx) => {
+              const isCurrent = currentSong?.id === song.id;
+              const isThisPlaying = isCurrent && isPlaying;
+              return (
+                <motion.div
+                  key={`recent-${song.id}-${idx}`}
+                  variants={itemVariants}
+                  onClick={() => handlePlayCollection(song, recentlyPlayed)}
+                  className={`flex flex-col border rounded-xl p-3 cursor-pointer hover:bg-neutral-800/40 transition-all group relative ${
+                    isCurrent 
+                      ? 'bg-violet-500/10 border-violet-500/30' 
+                      : 'bg-neutral-900/20 border-white/5'
+                  }`}
+                >
+                  <div className="aspect-square w-full rounded-lg overflow-hidden relative mb-3 border border-white/5">
+                    {song.thumbnailUrl ? (
+                      <img
+                        src={song.thumbnailUrl}
+                        alt={song.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-neutral-500">
+                        <Music size={24} />
+                      </div>
+                    )}
+                    {isThisPlaying && (
+                      <div className="absolute bottom-2 left-2 z-10 flex items-end gap-[3px] bg-black/60 px-2 py-1.5 rounded-md backdrop-blur-sm">
+                        <div className="w-[3px] h-3 bg-violet-400 rounded-full animate-pulse [animation-duration:0.6s]" />
+                        <div className="w-[3px] h-4 bg-violet-400 rounded-full animate-pulse [animation-duration:0.4s]" />
+                        <div className="w-[3px] h-2 bg-violet-400 rounded-full animate-pulse [animation-duration:0.8s]" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <button className="bg-white text-black p-3 rounded-full hover:scale-105 transition-transform shadow-lg">
+                        {isThisPlaying ? (
+                          <Pause size={18} fill="black" />
+                        ) : (
+                          <Play size={18} fill="black" className="translate-x-px" />
+                        )}
+                      </button>
+                    </div>
+                    <div className="absolute top-1.5 right-1.5 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-black/60 rounded-full hover:bg-black/80 backdrop-blur-sm" onClick={e => e.stopPropagation()}>
+                      <AddToPlaylistMenu song={song} direction="down" />
+                    </div>
+                  </div>
+                  <h3 className={`text-xs font-bold truncate max-w-full leading-snug ${
+                    isCurrent ? 'text-violet-400' : 'text-white'
+                  }`}>{song.title}</h3>
+                  <p className="text-[10px] text-neutral-400 truncate mt-1">{song.artist}</p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+          <Flame className="text-orange-500" size={22} /> Trending Songs
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {trendingSongs.map((song, idx) => {
+            const isCurrent = currentSong?.id === song.id;
+            const isThisPlaying = isCurrent && isPlaying;
+            return (
               <motion.div
-                key={`recent-${song.id}-${idx}`}
+                key={`trending-${song.id}-${idx}`}
                 variants={itemVariants}
-                onClick={() => handlePlayCollection(song, recentlyPlayed)}
-                className="flex flex-col bg-neutral-900/20 border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-neutral-800/40 transition-all group relative"
+                onClick={() => handlePlayCollection(song, trendingSongs)}
+                className={`flex flex-col border rounded-xl p-3 cursor-pointer hover:bg-neutral-800/40 transition-all group relative ${
+                  isCurrent 
+                    ? 'bg-violet-500/10 border-violet-500/30' 
+                    : 'bg-neutral-900/20 border-white/5'
+                }`}
               >
                 <div className="aspect-square w-full rounded-lg overflow-hidden relative mb-3 border border-white/5">
                   {song.thumbnailUrl ? (
@@ -120,60 +212,33 @@ export default function HomeClient({
                       <Music size={24} />
                     </div>
                   )}
+                  {isThisPlaying && (
+                    <div className="absolute bottom-2 left-2 z-10 flex items-end gap-[3px] bg-black/60 px-2 py-1.5 rounded-md backdrop-blur-sm">
+                      <div className="w-[3px] h-3 bg-violet-400 rounded-full animate-pulse [animation-duration:0.6s]" />
+                      <div className="w-[3px] h-4 bg-violet-400 rounded-full animate-pulse [animation-duration:0.4s]" />
+                      <div className="w-[3px] h-2 bg-violet-400 rounded-full animate-pulse [animation-duration:0.8s]" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                     <button className="bg-white text-black p-3 rounded-full hover:scale-105 transition-transform shadow-lg">
-                      <Play size={18} fill="black" className="translate-x-px" />
+                      {isThisPlaying ? (
+                        <Pause size={18} fill="black" />
+                      ) : (
+                        <Play size={18} fill="black" className="translate-x-px" />
+                      )}
                     </button>
                   </div>
                   <div className="absolute top-1.5 right-1.5 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-black/60 rounded-full hover:bg-black/80 backdrop-blur-sm" onClick={e => e.stopPropagation()}>
                     <AddToPlaylistMenu song={song} direction="down" />
                   </div>
                 </div>
-                <h3 className="text-xs font-bold text-white truncate max-w-full leading-snug">{song.title}</h3>
+                <h3 className={`text-xs font-bold truncate max-w-full leading-snug ${
+                  isCurrent ? 'text-violet-400' : 'text-white'
+                }`}>{song.title}</h3>
                 <p className="text-[10px] text-neutral-400 truncate mt-1">{song.artist}</p>
               </motion.div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="flex flex-col gap-4">
-        <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
-          <Flame className="text-orange-500" size={22} /> Trending Songs
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {trendingSongs.map((song, idx) => (
-            <motion.div
-              key={`trending-${song.id}-${idx}`}
-              variants={itemVariants}
-              onClick={() => handlePlayCollection(song, trendingSongs)}
-              className="flex flex-col bg-neutral-900/20 border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-neutral-800/40 transition-all group relative"
-            >
-              <div className="aspect-square w-full rounded-lg overflow-hidden relative mb-3 border border-white/5">
-                {song.thumbnailUrl ? (
-                  <img
-                    src={song.thumbnailUrl}
-                    alt={song.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-neutral-500">
-                    <Music size={24} />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                  <button className="bg-white text-black p-3 rounded-full hover:scale-105 transition-transform shadow-lg">
-                    <Play size={18} fill="black" className="translate-x-px" />
-                  </button>
-                </div>
-                <div className="absolute top-1.5 right-1.5 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-black/60 rounded-full hover:bg-black/80 backdrop-blur-sm" onClick={e => e.stopPropagation()}>
-                  <AddToPlaylistMenu song={song} direction="down" />
-                </div>
-              </div>
-              <h3 className="text-xs font-bold text-white truncate max-w-full leading-snug">{song.title}</h3>
-              <p className="text-[10px] text-neutral-400 truncate mt-1">{song.artist}</p>
-            </motion.div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -182,38 +247,59 @@ export default function HomeClient({
           <Disc className="text-violet-500 animate-spin-slow" size={22} /> New Releases
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {newReleases.map((song, idx) => (
-            <motion.div
-              key={`new-${song.id}-${idx}`}
-              variants={itemVariants}
-              onClick={() => handlePlayCollection(song, newReleases)}
-              className="flex flex-col bg-neutral-900/20 border border-white/5 rounded-xl p-3 cursor-pointer hover:bg-neutral-800/40 transition-all group relative"
-            >
-              <div className="aspect-square w-full rounded-lg overflow-hidden relative mb-3 border border-white/5">
-                {song.thumbnailUrl ? (
-                  <img
-                    src={song.thumbnailUrl}
-                    alt={song.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-neutral-500">
-                    <Music size={24} />
+          {newReleases.map((song, idx) => {
+            const isCurrent = currentSong?.id === song.id;
+            const isThisPlaying = isCurrent && isPlaying;
+            return (
+              <motion.div
+                key={`new-${song.id}-${idx}`}
+                variants={itemVariants}
+                onClick={() => handlePlayCollection(song, newReleases)}
+                className={`flex flex-col border rounded-xl p-3 cursor-pointer hover:bg-neutral-800/40 transition-all group relative ${
+                  isCurrent 
+                    ? 'bg-violet-500/10 border-violet-500/30' 
+                    : 'bg-neutral-900/20 border-white/5'
+                }`}
+              >
+                <div className="aspect-square w-full rounded-lg overflow-hidden relative mb-3 border border-white/5">
+                  {song.thumbnailUrl ? (
+                    <img
+                      src={song.thumbnailUrl}
+                      alt={song.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-neutral-500">
+                      <Music size={24} />
+                    </div>
+                  )}
+                  {isThisPlaying && (
+                    <div className="absolute bottom-2 left-2 z-10 flex items-end gap-[3px] bg-black/60 px-2 py-1.5 rounded-md backdrop-blur-sm">
+                      <div className="w-[3px] h-3 bg-violet-400 rounded-full animate-pulse [animation-duration:0.6s]" />
+                      <div className="w-[3px] h-4 bg-violet-400 rounded-full animate-pulse [animation-duration:0.4s]" />
+                      <div className="w-[3px] h-2 bg-violet-400 rounded-full animate-pulse [animation-duration:0.8s]" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <button className="bg-white text-black p-3 rounded-full hover:scale-105 transition-transform shadow-lg">
+                      {isThisPlaying ? (
+                        <Pause size={18} fill="black" />
+                      ) : (
+                        <Play size={18} fill="black" className="translate-x-px" />
+                      )}
+                    </button>
                   </div>
-                )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                  <button className="bg-white text-black p-3 rounded-full hover:scale-105 transition-transform shadow-lg">
-                    <Play size={18} fill="black" className="translate-x-px" />
-                  </button>
+                  <div className="absolute top-1.5 right-1.5 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-black/60 rounded-full hover:bg-black/80 backdrop-blur-sm" onClick={e => e.stopPropagation()}>
+                    <AddToPlaylistMenu song={song} direction="down" />
+                  </div>
                 </div>
-                <div className="absolute top-1.5 right-1.5 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-black/60 rounded-full hover:bg-black/80 backdrop-blur-sm" onClick={e => e.stopPropagation()}>
-                  <AddToPlaylistMenu song={song} direction="down" />
-                </div>
-              </div>
-              <h3 className="text-xs font-bold text-white truncate max-w-full leading-snug">{song.title}</h3>
-              <p className="text-[10px] text-neutral-400 truncate mt-1">{song.artist}</p>
-            </motion.div>
-          ))}
+                <h3 className={`text-xs font-bold truncate max-w-full leading-snug ${
+                  isCurrent ? 'text-violet-400' : 'text-white'
+                }`}>{song.title}</h3>
+                <p className="text-[10px] text-neutral-400 truncate mt-1">{song.artist}</p>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 

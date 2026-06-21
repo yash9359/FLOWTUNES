@@ -103,12 +103,23 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [volume, isMuted]);
 
   const [clientStreamUrl, setClientStreamUrl] = useState<string | null>(null);
+  const [streamSongId, setStreamSongId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentSong) {
       setClientStreamUrl(null);
+      setStreamSongId(null);
       return;
     }
+
+    // Immediately pause existing audio and clear stream URL to prevent the old song from leaking
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setClientStreamUrl(null);
+    setStreamSongId(null);
+
+    let active = true;
 
     const resolveStream = async () => {
       setPlaybackError(null);
@@ -116,8 +127,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const store = useAppStore.getState();
       const cachedUrl = store.getCachedStreamUrl(currentSong.id);
       if (cachedUrl) {
+        if (!active) return;
         console.log(`[Player] Success: Serving cached stream URL for ${currentSong.id}`);
         setClientStreamUrl(cachedUrl);
+        setStreamSongId(currentSong.id);
         return;
       }
       
@@ -130,57 +143,71 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       try {
         const res = await fetch(`https://jio-savan-api-omega.vercel.app/song/get/?id=${currentSong.id}`).then(r => r.json());
+        if (!active) return;
         if (res && res.media_url) {
           const secureUrl = res.media_url.replace('http://', 'https://');
           console.log(`[Player] Success: ID match from JioSaavn API`);
           store.setCachedStreamUrl(currentSong.id, secureUrl);
           setClientStreamUrl(secureUrl);
+          setStreamSongId(currentSong.id);
           return;
         }
       } catch (e) {}
 
+      if (!active) return;
       console.log('[Player] ID failed, trying Content-Match for:', searchTerms);
       try {
         const sRes = await fetch(`https://jio-savan-api-omega.vercel.app/song/?query=${encodeURIComponent(searchTerms)}`).then(r => r.json());
+        if (!active) return;
         const match = Array.isArray(sRes) ? sRes[0] : null;
         if (match && match.media_url) {
           const secureUrl = match.media_url.replace('http://', 'https://');
           console.log(`[Player] Success: Content-Match from JioSaavn API`);
           store.setCachedStreamUrl(currentSong.id, secureUrl);
           setClientStreamUrl(secureUrl);
+          setStreamSongId(currentSong.id);
           return;
         }
       } catch (e) {}
 
+      if (!active) return;
       if (currentSong.id.length === 11) {
         const pipedInstances = ['https://pipedapi.kavin.rocks', 'https://pipedapi.moomoo.me', 'https://api.piped.privacydev.net'];
         for (const inst of pipedInstances) {
           try {
             const pRes = await fetch(`${inst}/streams/${currentSong.id}`).then(r => r.json());
+            if (!active) return;
             if (pRes.audioStreams?.length > 0) {
               pRes.audioStreams.sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0));
               const secureUrl = pRes.audioStreams[0].url.replace('http://', 'https://');
               console.log(`[Player] Success: Piped instance ${inst}`);
               store.setCachedStreamUrl(currentSong.id, secureUrl);
               setClientStreamUrl(secureUrl);
+              setStreamSongId(currentSong.id);
               return;
             }
           } catch (e) {}
         }
       }
 
+      if (!active) return;
       console.warn('[Player] All client strategies failed, using server proxy.');
       const fallbackUrl = `/api/stream?v=${currentSong.id}&title=${encodeURIComponent(currentSong.title)}&artist=${encodeURIComponent(currentSong.artist)}&cb=v2`;
       store.setCachedStreamUrl(currentSong.id, fallbackUrl);
       setClientStreamUrl(fallbackUrl);
+      setStreamSongId(currentSong.id);
     };
 
     resolveStream();
+
+    return () => {
+      active = false;
+    };
   }, [currentSong]);
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !clientStreamUrl) return;
+    if (!audio || !clientStreamUrl || streamSongId !== currentSong?.id) return;
 
     if (currentSong) {
       if (currentSong.id !== prevSongIdRef.current) {
@@ -197,7 +224,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } else {
       audio.pause();
     }
-  }, [isPlaying, currentSong, clientStreamUrl]);
+  }, [isPlaying, currentSong, clientStreamUrl, streamSongId]);
 
   const user = useAppStore(state => state.user);
 
@@ -426,6 +453,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const handleAudioError = () => {
+    if (!clientStreamUrl) return;
     if (currentSong) {
       console.warn(`[Player] Playback error for ${currentSong.id}, clearing cached stream URL`);
       useAppStore.getState().clearCachedStreamUrl(currentSong.id);
