@@ -53,6 +53,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [shuffleMode, setShuffleMode] = useState(false);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>('none');
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+  const [clientStreamUrl, setClientStreamUrl] = useState<string | null>(null);
+  const [streamSongId, setStreamSongId] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const prevSongIdRef = useRef<string | null>(null);
@@ -99,11 +101,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
+      audioRef.current.muted = isMuted;
     }
-  }, [volume, isMuted]);
-
-  const [clientStreamUrl, setClientStreamUrl] = useState<string | null>(null);
-  const [streamSongId, setStreamSongId] = useState<string | null>(null);
+  }, [volume, isMuted, clientStreamUrl]);
 
   useEffect(() => {
     if (!currentSong) {
