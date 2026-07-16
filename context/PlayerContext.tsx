@@ -40,6 +40,11 @@ interface PlayerContextType {
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
+const toPlayableStreamUrl = (streamUrl: string) => {
+  if (streamUrl.startsWith('/api/stream')) return streamUrl;
+  return `/api/stream?url=${encodeURIComponent(streamUrl)}`;
+};
+
 export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -129,7 +134,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (cachedUrl) {
         if (!active) return;
         console.log(`[Player] Success: Serving cached stream URL for ${currentSong.id}`);
-        setClientStreamUrl(cachedUrl);
+        setClientStreamUrl(toPlayableStreamUrl(cachedUrl));
         setStreamSongId(currentSong.id);
         return;
       }
@@ -147,8 +152,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (res && res.media_url) {
           const secureUrl = res.media_url.replace('http://', 'https://');
           console.log(`[Player] Success: ID match from JioSaavn API`);
-          store.setCachedStreamUrl(currentSong.id, secureUrl);
-          setClientStreamUrl(secureUrl);
+          const playableUrl = toPlayableStreamUrl(secureUrl);
+          store.setCachedStreamUrl(currentSong.id, playableUrl);
+          setClientStreamUrl(playableUrl);
           setStreamSongId(currentSong.id);
           return;
         }
@@ -163,8 +169,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (match && match.media_url) {
           const secureUrl = match.media_url.replace('http://', 'https://');
           console.log(`[Player] Success: Content-Match from JioSaavn API`);
-          store.setCachedStreamUrl(currentSong.id, secureUrl);
-          setClientStreamUrl(secureUrl);
+          const playableUrl = toPlayableStreamUrl(secureUrl);
+          store.setCachedStreamUrl(currentSong.id, playableUrl);
+          setClientStreamUrl(playableUrl);
           setStreamSongId(currentSong.id);
           return;
         }
@@ -181,8 +188,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
               pRes.audioStreams.sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0));
               const secureUrl = pRes.audioStreams[0].url.replace('http://', 'https://');
               console.log(`[Player] Success: Piped instance ${inst}`);
-              store.setCachedStreamUrl(currentSong.id, secureUrl);
-              setClientStreamUrl(secureUrl);
+              const playableUrl = toPlayableStreamUrl(secureUrl);
+              store.setCachedStreamUrl(currentSong.id, playableUrl);
+              setClientStreamUrl(playableUrl);
               setStreamSongId(currentSong.id);
               return;
             }
@@ -454,6 +462,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const handleAudioError = () => {
     if (!clientStreamUrl) return;
+    setIsPlaying(false);
     if (currentSong) {
       console.warn(`[Player] Playback error for ${currentSong.id}, clearing cached stream URL`);
       useAppStore.getState().clearCachedStreamUrl(currentSong.id);
